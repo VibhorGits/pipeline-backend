@@ -2,6 +2,10 @@ module github.com/instill-ai/pipeline-backend
 
 go 1.22.5
 
+//replace github.com/instill-ai/protogen-go => ./../protogen-go
+//
+//replace github.com/instill-ai/component => ./../component
+
 require (
 	cloud.google.com/go/bigquery v1.60.0
 	cloud.google.com/go/iam v1.1.8

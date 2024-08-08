@@ -1,0 +1,86 @@
+server:
+  privateport: 3081
+  publicport: 8081
+  https:
+    cert:
+    key:
+  edition: local-ce:dev
+  usage:
+    enabled: true
+    tlsenabled: true
+    host: usage.instill.tech
+    port: 443
+  debug: true
+  maxdatasize: 12 # MB in unit
+  workflow:
+    maxworkflowtimeout: 3600 # in seconds
+    maxworkflowretry: 1
+    maxactivityretry: 1
+  instanceid: "pipeline-backend"
+  datachanbuffersize: 100
+  instillcorehost: http://localhost:8080
+connector:
+database:
+  username: postgres
+  password: password
+  host: localhost
+  port: 5432
+  name: pipeline
+  version: 27
+  timezone: Etc/UTC
+  pool:
+    idleconnections: 5
+    maxconnections: 10
+    connlifetime: 30m # In minutes, e.g., '60m'
+influxdb:
+  url: http://localhost:8086
+  token: i-love-instill-ai
+  org: instill-ai
+  bucket: instill-ai
+  flushinterval: 10s
+  https:
+    cert:
+    key:
+cache:
+  redis:
+    redisoptions:
+      addr: localhost:6379
+log:
+  external: false
+  otelcollector:
+    host: otel-collector
+    port: 8095
+temporal:
+  hostport: localhost:7233
+  namespace: pipeline-backend
+  retention: 1d
+  ca:
+  cert:
+  key:
+  servername:
+mgmtbackend:
+  host: localhost
+  publicport: 8084
+  privateport: 3084
+  https:
+    cert:
+    key:
+modelbackend:
+  host: localhost
+  publicport: 8083
+  https:
+    cert:
+    key:
+openfga:
+  host: localhost
+  port: 8060
+instillcloud:
+  host: api.instill.tech
+  port: 443
+minio:
+  host: localhost
+  port: 19000
+  rootuser: minioadmin
+  rootpwd: minioadmin
+  bucketname: instill-ai-vdp
+  secure: false

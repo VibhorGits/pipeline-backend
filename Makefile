@@ -131,3 +131,7 @@ gen-component-doc:				## Generate component docs
 help:       	 				## Show this help
 	@echo "\nMakefile for local development"
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m (default: help)\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+
+start:
+	go run ./cmd/migration/main.go
+	go run ./cmd/init/main.go

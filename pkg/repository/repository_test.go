@@ -39,7 +39,7 @@ import (
 var db *gorm.DB
 
 func TestMain(m *testing.M) {
-	if err := config.Init("../../config/config.yaml"); err != nil {
+	if err := config.Init("../../config/config.local.yaml"); err != nil {
 		panic(err)
 	}
 
