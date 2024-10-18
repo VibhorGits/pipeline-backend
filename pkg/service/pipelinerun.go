@@ -119,18 +119,19 @@ func (s *service) ListPipelineRuns(ctx context.Context, req *pb.ListPipelineRuns
 		metadataMap[content.Name] = content.Content
 	}
 
-	requesterIDMap := make(map[string]struct{})
+	userUIDMap := make(map[string]struct{})
 	for _, pipelineRun := range pipelineRuns {
-		requesterIDMap[pipelineRun.TriggeredBy] = struct{}{}
+		userUIDMap[pipelineRun.TriggeredBy] = struct{}{}
+		userUIDMap[pipelineRun.Namespace] = struct{}{}
 	}
 
-	runnerMap := make(map[string]*string)
-	for requesterID := range requesterIDMap {
+	userIDMap := make(map[string]*string)
+	for requesterID := range userUIDMap {
 		runner, err := s.mgmtPrivateServiceClient.CheckNamespaceByUIDAdmin(ctx, &mgmtpb.CheckNamespaceByUIDAdminRequest{Uid: requesterID})
 		if err != nil {
 			return nil, err
 		}
-		runnerMap[requesterID] = &runner.Id
+		userIDMap[requesterID] = &runner.Id
 	}
 
 	// Convert datamodel.PipelineRun to pb.PipelineRun
@@ -140,7 +141,8 @@ func (s *service) ListPipelineRuns(ctx context.Context, req *pb.ListPipelineRuns
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert pipeline run: %w", err)
 		}
-		pbRun.RunnerId = runnerMap[run.TriggeredBy]
+		pbRun.RunnerId = userIDMap[run.TriggeredBy]
+		pbRun.RequesterId = userIDMap[run.Namespace]
 
 		if CanViewPrivateData(run.Namespace, requesterUID) {
 			if len(run.Inputs) == 1 {
@@ -273,7 +275,7 @@ func (s *service) ListComponentRuns(ctx context.Context, req *pb.ListComponentRu
 	}, nil
 }
 
-func (s *service) ListPipelineRunsByRequester(ctx context.Context, req *pb.ListPipelineRunsByCreditOwnerRequest) (*pb.ListPipelineRunsByCreditOwnerResponse, error) {
+func (s *service) ListPipelineRunsByRequester(ctx context.Context, req *pb.ListPipelineRunsByRequesterRequest) (*pb.ListPipelineRunsByRequesterResponse, error) {
 	page := s.pageInRange(req.GetPage())
 	pageSize := s.pageSizeInRange(req.GetPageSize())
 	requesterUID, _ := utils.GetRequesterUIDAndUserUID(ctx)
@@ -327,6 +329,7 @@ func (s *service) ListPipelineRunsByRequester(ctx context.Context, req *pb.ListP
 	requesterIDMap := make(map[string]struct{})
 	for _, pipelineRun := range pipelineRuns {
 		requesterIDMap[pipelineRun.TriggeredBy] = struct{}{}
+		requesterIDMap[pipelineRun.Namespace] = struct{}{}
 	}
 
 	runnerMap := make(map[string]*string)
@@ -347,10 +350,11 @@ func (s *service) ListPipelineRunsByRequester(ctx context.Context, req *pb.ListP
 			return nil, fmt.Errorf("converting pipeline run: %w", err)
 		}
 		pbRun.RunnerId = runnerMap[run.TriggeredBy]
+		pbRun.RequesterId = runnerMap[run.Namespace]
 		pbPipelineRuns[i] = pbRun
 	}
 
-	return &pb.ListPipelineRunsByCreditOwnerResponse{
+	return &pb.ListPipelineRunsByRequesterResponse{
 		PipelineRuns: pbPipelineRuns,
 		TotalSize:    int32(totalCount),
 		Page:         int32(page),
